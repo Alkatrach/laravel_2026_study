@@ -1,0 +1,130 @@
+$grid-breakpoints: (
+    xs: 0,
+    sm: 576px,
+    md: 768px,
+    lg: 1001px,
+    xl: 1200px,
+    xxl: 1400px,
+    xxxl: 1800px
+);
+$container-max-widths: (
+    sm: 540px,
+    md: 720px,
+    lg: 960px,
+    xl: 1140px,
+    xxl: 1320px,
+    xxxl: 1600px
+);
+
+$header-footer-color: #229760;
+$base-color: #34db8d;
+$indent-color: #0f9e5b;
+$text-color: #032b18;
+$alpha-color: #11e6838e;
+$logo-color: #b3ff81;
+$button-color: #265c00;
+
+@use "bootstrap/scss/bootstrap" with ($grid-breakpoints: $grid-breakpoints, //переопределение брейкпойнтов
+    $container-max-widths: $container-max-widths,
+    $primary: $button-color,
+    $body-color: $text-color,
+    $body-bg: $base-color,
+    $modal-content-bg: $base-color,
+    $modal-content-color: $text-color,
+    $modal-header-border-color: $indent-color,
+    $popover-bg: $logo-color,
+    $popover-body-color: $text-color,
+    $popover-header-bg: $header-footer-color,
+    $popover-header-color: $logo-color,
+    $popover-border-color: $indent-color,
+    $toast-background-color: $logo-color,
+    $toast-color: $text-color,
+    $toast-header-background-color: $header-footer-color,
+    $toast-header-color: $logo-color );
+@use "sass:color";
+
+.popover-term {
+    border-bottom: 1px dashed currentColor;
+    cursor: help;
+}
+
+.modal-img {
+    max-height: 300px;
+    object-fit: cover;
+    width: 100%;
+}
+
+#header {
+    background-color: $header-footer-color;
+    margin-bottom: 1vh;
+    #header-logo-container {
+        a {
+            text-decoration: none;
+        }
+
+        #header-logo {
+            font-size: 4vh;
+            background-color: $logo-color;
+        }
+
+        #header-title {
+            color: $logo-color;
+        }
+    }
+    a{
+        color: $logo-color;
+    }
+}
+
+body {
+    background-color: $base-color;
+}
+
+#content {
+    .card {
+        .content-type {
+            position: absolute;
+            background-color: $alpha-color;
+            padding: 2px;
+            top: 2%;
+            left: 2%;
+            border-radius: 2px;
+            font-size: 1rem;
+        }
+    }
+
+    @for $i from 1 through 5 {
+        .col:nth-child(5n + #{$i}) {
+            .card {
+                background-color: color.adjust($indent-color, $hue: (
+                        $i - 1) % 5 * 10deg
+                );
+        }
+    }
+}
+}
+
+#footer {
+    background-color: $header-footer-color;
+    margin-top: 1vh;
+    #footer-social{
+        img{
+            max-height: 50%;
+            margin-top: 25%;
+        }
+    }
+    span{
+        font-size: 24px;
+    }
+}
+
+.btn-primary {
+  --bs-btn-color: #{$logo-color};
+  --bs-btn-hover-color: #{$logo-color};
+  --bs-btn-active-color: #{$logo-color};
+  --bs-btn-disabled-color: #{$logo-color};
+}
+
+.modal-img {
+    max-height: fit-content;
+}
