@@ -2,63 +2,87 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Turtle;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class TurtleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $turtles = Turtle::latest()->get();
+
+        return view('turtles.index', compact('turtles'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('turtles.create', ['turtle' => new Turtle]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate($this->rules());
+
+        if ($request->hasFile('image')) {
+            $data['image'] = $this->saveImage($request->file('image'));
+        }
+
+        Turtle::create($data);
+
+        return redirect()->route('turtles.index')->with('success', 'Объект добавлен');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Request $request, Turtle $turtle)
     {
-        //
+        if ($request->ajax()) {
+            return view('turtles._details', compact('turtle'));
+        }
+
+        return view('turtles.show', compact('turtle'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(Turtle $turtle)
     {
-        //
+        return view('turtles.edit', compact('turtle'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Turtle $turtle)
     {
-        //
+        $data = $request->validate($this->rules());
+
+        if ($request->hasFile('image')) {
+            if ($turtle->image) {
+                Storage::disk('public')->delete($turtle->image);
+            }
+            $data['image'] = $this->saveImage($request->file('image'));
+        }
+
+        $turtle->update($data);
+
+        return redirect()->route('turtles.index')->with('success', 'Объект обновлён');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Turtle $turtle)
     {
-        //
+        $turtle->delete();
+
+        return redirect()->route('turtles.index')->with('success', 'Объект удалён');
+    }
+
+    private function rules(): array
+    {
+        return [
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string'],
+            'publication_date' => ['required', 'date'],
+            'image' => ['nullable', 'image', 'max:4096'],
+        ];
+    }
+
+    private function saveImage($file): string
+    {
+        return $file->store('turtles', 'public');
     }
 }
