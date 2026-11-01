@@ -6,24 +6,24 @@ use App\Models\Turtle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class TurtleController extends Controller
 {
     public function index()
     {
-        $turtles = Turtle::latest()->get();
-
-        return view('turtles.index', compact('turtles'));
+        return view('turtles.index', ['turtles' => Turtle::orderBy('id')->get()]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        return view('turtles.create', ['turtle' => new Turtle]);
+        return $this->modal($request, 'turtles.form', ['turtle' => new Turtle]);
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate($this->rules());
+        $data = $this->validated($request);
 
         if ($request->hasFile('image')) {
             $data['image'] = $this->saveImage($request->file('image'));
@@ -31,26 +31,22 @@ class TurtleController extends Controller
 
         Turtle::create($data);
 
-        return redirect()->route('turtles.index')->with('success', 'Объект добавлен');
+        return $this->done($request, 'Черепаха добавлена');
     }
 
     public function show(Request $request, Turtle $turtle)
     {
-        if ($request->ajax()) {
-            return view('turtles._details', compact('turtle'));
-        }
-
-        return view('turtles.show', compact('turtle'));
+        return $this->modal($request, 'turtles.show', compact('turtle'));
     }
 
-    public function edit(Turtle $turtle)
+    public function edit(Request $request, Turtle $turtle)
     {
-        return view('turtles.edit', compact('turtle'));
+        return $this->modal($request, 'turtles.form', compact('turtle'));
     }
 
     public function update(Request $request, Turtle $turtle)
     {
-        $data = $request->validate($this->rules());
+        $data = $this->validated($request);
 
         if ($request->hasFile('image')) {
             if ($turtle->image) {
@@ -61,28 +57,66 @@ class TurtleController extends Controller
 
         $turtle->update($data);
 
-        return redirect()->route('turtles.index')->with('success', 'Объект обновлён');
+        return $this->done($request, 'Изменения сохранены');
     }
 
-    public function destroy(Turtle $turtle)
+    public function destroy(Request $request, Turtle $turtle)
     {
         $turtle->delete();
 
-        return redirect()->route('turtles.index')->with('success', 'Объект удалён');
+        return $this->done($request, 'Черепаха удалена');
     }
 
-    private function rules(): array
+    private function modal(Request $request, string $view, array $data)
     {
-        return [
+        return $request->ajax() ? view($view, $data) : redirect()->route('turtles.index');
+    }
+
+    private function done(Request $request, string $message)
+    {
+        session()->flash('success', $message);
+
+        return $request->expectsJson()
+            ? response()->json(['ok' => true])
+            : redirect()->route('turtles.index');
+    }
+
+    private function validated(Request $request): array
+    {
+        $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
+            'type' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
-            'publication_date' => ['required', 'date'],
+            'details' => ['nullable', 'string'],
+            'publication_date' => ['nullable', 'date'],
             'image' => ['nullable', 'image', 'max:4096'],
-        ];
+        ], [
+            'required' => 'Поле «:attribute» обязательно.',
+            'max.string' => 'Поле «:attribute» слишком длинное.',
+            'max.file' => 'Файл больше :max КБ.',
+            'image' => 'Нужен файл-изображение.',
+            'date' => 'Неверная дата.',
+        ], [
+            'title' => 'название',
+            'type' => 'семейство',
+            'description' => 'описание',
+            'details' => 'подробности',
+            'publication_date' => 'дата',
+            'image' => 'изображение',
+        ]);
+
+        unset($data['image']);
+
+        return $data;
     }
 
     private function saveImage($file): string
     {
-        return $file->store('turtles', 'public');
+        $image = (new ImageManager(new Driver()))->read($file)->cover(800, 500);
+        $path = 'turtles/' . Str::uuid() . '.jpg';
+
+        Storage::disk('public')->put($path, (string) $image->toJpeg(85));
+
+        return $path;
     }
 }

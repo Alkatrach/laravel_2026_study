@@ -2,18 +2,17 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
-
 
 class Turtle extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['title', 'description', 'publication_date', 'image'];
+    protected $fillable = ['title', 'type', 'description', 'details', 'publication_date', 'image'];
 
     protected function title(): Attribute
     {
@@ -22,18 +21,40 @@ class Turtle extends Model
         );
     }
 
-    protected function releaseDate(): Attribute
+    protected function publicationDate(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value?Carbon::parse($value) : null,
-            set: fn ($value)=>Carbon::parse($value)->format('Y-m-d'),
+            get: fn ($value) => $value ? Carbon::parse($value) : null,
+            set: fn ($value) => $value ? Carbon::parse($value)->format('Y-m-d') : null,
         );
     }
 
     protected function imageUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->image?asset('storage/' . $this->image):'https://placehold.co/600x400?text=No+image',
+            get: fn () => $this->image
+                ? asset('storage/' . $this->image)
+                : 'https://placehold.co/800x500?text=No+image',
+        );
+    }
+
+    protected function detailsHtml(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $paragraphs = preg_split('/\R+/', trim((string) $this->details));
+
+                return collect($paragraphs)->filter()->map(function ($paragraph) {
+                    $paragraph = preg_replace_callback(
+                        '/\{\{(.+?)\|(.+?)\}\}/u',
+                        fn ($m) => '<span class="popover-term" tabindex="0" data-bs-toggle="popover" data-bs-title="'
+                            . Str::ucfirst($m[1]) . '" data-bs-content="' . $m[2] . '">' . $m[1] . '</span>',
+                        e($paragraph)
+                    );
+
+                    return '<p>' . $paragraph . '</p>';
+                })->implode('');
+            },
         );
     }
 }

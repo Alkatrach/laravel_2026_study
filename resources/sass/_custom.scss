@@ -1,3 +1,5 @@
+@use "sass:color";
+
 $grid-breakpoints: (
     xs: 0,
     sm: 576px,
@@ -24,7 +26,8 @@ $alpha-color: #11e6838e;
 $logo-color: #b3ff81;
 $button-color: #265c00;
 
-@use "bootstrap/scss/bootstrap" with ($grid-breakpoints: $grid-breakpoints, //переопределение брейкпойнтов
+@use "bootstrap/scss/bootstrap" with (
+    $grid-breakpoints: $grid-breakpoints,
     $container-max-widths: $container-max-widths,
     $primary: $button-color,
     $body-color: $text-color,
@@ -32,6 +35,7 @@ $button-color: #265c00;
     $modal-content-bg: $base-color,
     $modal-content-color: $text-color,
     $modal-header-border-color: $indent-color,
+    $modal-footer-border-color: $indent-color,
     $popover-bg: $logo-color,
     $popover-body-color: $text-color,
     $popover-header-bg: $header-footer-color,
@@ -40,8 +44,12 @@ $button-color: #265c00;
     $toast-background-color: $logo-color,
     $toast-color: $text-color,
     $toast-header-background-color: $header-footer-color,
-    $toast-header-color: $logo-color );
-@use "sass:color";
+    $toast-header-color: $logo-color
+);
+
+body {
+    background-color: $base-color;
+}
 
 .popover-term {
     border-bottom: 1px dashed currentColor;
@@ -49,14 +57,25 @@ $button-color: #265c00;
 }
 
 .modal-img {
-    max-height: 300px;
-    object-fit: cover;
     width: 100%;
+    object-fit: cover;
+}
+
+.btn-primary {
+    --bs-btn-color: #{$logo-color};
+    --bs-btn-hover-color: #{$logo-color};
+    --bs-btn-active-color: #{$logo-color};
+    --bs-btn-disabled-color: #{$logo-color};
 }
 
 #header {
     background-color: $header-footer-color;
     margin-bottom: 1vh;
+
+    a {
+        color: $logo-color;
+    }
+
     #header-logo-container {
         a {
             text-decoration: none;
@@ -71,13 +90,6 @@ $button-color: #265c00;
             color: $logo-color;
         }
     }
-    a{
-        color: $logo-color;
-    }
-}
-
-body {
-    background-color: $base-color;
 }
 
 #content {
@@ -96,35 +108,24 @@ body {
     @for $i from 1 through 5 {
         .col:nth-child(5n + #{$i}) {
             .card {
-                background-color: color.adjust($indent-color, $hue: (
-                        $i - 1) % 5 * 10deg
-                );
+                background-color: color.adjust($indent-color, $hue: ($i - 1) * 10deg);
+            }
         }
     }
-}
 }
 
 #footer {
     background-color: $header-footer-color;
     margin-top: 1vh;
-    #footer-social{
-        img{
+
+    #footer-social {
+        img {
             max-height: 50%;
             margin-top: 25%;
         }
     }
-    span{
+
+    span {
         font-size: 24px;
     }
-}
-
-.btn-primary {
-  --bs-btn-color: #{$logo-color};
-  --bs-btn-hover-color: #{$logo-color};
-  --bs-btn-active-color: #{$logo-color};
-  --bs-btn-disabled-color: #{$logo-color};
-}
-
-.modal-img {
-    max-height: fit-content;
 }
