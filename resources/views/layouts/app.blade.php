@@ -37,11 +37,11 @@
     <div class="container-fluid row">
       <span class="col-9">Какуев Сергей</span>
       <div id="footer-social" class="col-3 row">
-        <a href="https://rossgram.ru" class="col"><img src="{{ asset('storage/turtles/ig.png') }}" class="img-fluid"
+        <a href="https://rossgram.ru" class="col"><img src="{{ asset('/content/images/ig.png') }}" class="img-fluid"
             alt="Instagram"></a>
-        <a href="https://max.ru" class="col"><img src="{{ asset('storage/turtles/fb.png') }}" class="img-fluid"
+        <a href="https://max.ru" class="col"><img src="{{ asset('/content/images/fb.png') }}" class="img-fluid"
             alt="Facebook"></a>
-        <a href="https://vk.ru" class="col"><img src="{{ asset('storage/turtles/tw.png') }}" class="img-fluid"
+        <a href="https://vk.ru" class="col"><img src="{{ asset('/content/images/tw.png') }}" class="img-fluid"
             alt="Twitter"></a>
       </div>
     </div>
