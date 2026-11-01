@@ -3,16 +3,18 @@ import '@fortawesome/fontawesome-free/js/all.js'
 
 const ajaxHeaders = { 'X-Requested-With': 'XMLHttpRequest' }
 
-const toastBtn = document.getElementById('liveToastBtn')
-toastBtn?.addEventListener('click', () => {
-  bootstrap.Toast.getOrCreateInstance(document.getElementById('liveToast')).show()
-})
-
 const detailsModal = document.getElementById('turtleModal')
 const formModal = document.getElementById('formModal')
 let current = -1
 
 const showButtons = () => [...document.querySelectorAll('.js-show')]
+
+const errorBlock = (text) => `
+  <div class="modal-header">
+    <h5 class="modal-title">Ошибка</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  </div>
+  <div class="modal-body">${text}</div>`
 
 function initPopovers(root) {
   root.querySelectorAll('[data-bs-toggle="popover"]').forEach((el) => {
@@ -21,10 +23,17 @@ function initPopovers(root) {
 }
 
 async function load(url, modalEl) {
-  const res = await fetch(url, { headers: ajaxHeaders })
-  if (!res.ok) return
+  let html
+  try {
+    const res = await fetch(url, { headers: ajaxHeaders })
+    html = res.ok ? await res.text() : errorBlock(`Сервер ответил ошибкой ${res.status}`)
+  } catch (err) {
+    console.error(err)
+    html = errorBlock('Не удалось связаться с сервером')
+  }
+
   document.querySelectorAll('.popover').forEach((p) => p.remove())
-  modalEl.querySelector('.modal-content').innerHTML = await res.text()
+  modalEl.querySelector('.modal-content').innerHTML = html
   initPopovers(modalEl)
   bootstrap.Modal.getOrCreateInstance(modalEl).show()
 }
@@ -79,5 +88,8 @@ document.addEventListener('submit', async (e) => {
       input.classList.add('is-invalid')
       input.parentElement.querySelector('.invalid-feedback').textContent = messages[0]
     })
+    return
   }
+
+  alert(`Сервер ответил ошибкой ${res.status}`)
 })

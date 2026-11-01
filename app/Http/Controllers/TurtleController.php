@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Format;
 use Intervention\Image\ImageManager;
 
 class TurtleController extends Controller
@@ -112,10 +113,13 @@ class TurtleController extends Controller
 
     private function saveImage($file): string
     {
-        $image = (new ImageManager(new Driver()))->read($file)->cover(800, 500);
+        $image = ImageManager::usingDriver(Driver::class)
+            ->decodePath($file->getRealPath())
+            ->cover(800, 500);
+
         $path = 'turtles/' . Str::uuid() . '.jpg';
 
-        Storage::disk('public')->put($path, (string) $image->toJpeg(85));
+        Storage::disk('public')->put($path, (string) $image->encodeUsingFormat(Format::JPEG, quality: 85));
 
         return $path;
     }

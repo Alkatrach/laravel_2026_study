@@ -10,6 +10,10 @@ use Illuminate\Support\Str;
 
 class Turtle extends Model
 {
+    //Астрологи объявили неделю стрелочных функций!
+    //Количество function, return и фигурных скобок в коде снижено на 50%. Прирост лаконичности во всех репозиториях увеличился вдвое! 
+    //До этого здесь была грязь.
+
     use SoftDeletes;
 
     protected $fillable = ['title', 'type', 'description', 'details', 'publication_date', 'image'];
@@ -42,11 +46,11 @@ class Turtle extends Model
     {
         return Attribute::make(
             get: function () {
-                $paragraphs = preg_split('/\R+/', trim((string) $this->details));
-
+                $paragraphs = preg_split('/\R+/u', trim((string) $this->details));//абзацы по переносам строк
+                //убираю пустые абзацы, парсю html заранее
                 return collect($paragraphs)->filter()->map(function ($paragraph) {
                     $paragraph = preg_replace_callback(
-                        '/\{\{(.+?)\|(.+?)\}\}/u',
+                        '/\{\{(.+?)\|(.+?)\}\}/u',//регулярка для разбития
                         fn ($m) => '<span class="popover-term" tabindex="0" data-bs-toggle="popover" data-bs-title="'
                             . Str::ucfirst($m[1]) . '" data-bs-content="' . $m[2] . '">' . $m[1] . '</span>',
                         e($paragraph)

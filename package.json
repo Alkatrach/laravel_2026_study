@@ -18,6 +18,7 @@
         "@fortawesome/fontawesome-free": "^7.3.1",
         "@popperjs/core": "^2.11.8",
         "bootstrap": "^5.3.8",
+        "fontaine": "^0.8.2",
         "fontawesome": "^5.6.3",
         "jquery": "^4.0.0",
         "sass": "^1.106.1"

@@ -2,12 +2,7 @@
 
 @section('content')
   <div id="content" class="container">
-    <div class="d-flex justify-content-between align-turtles-center">
-      <h1 id="title">Семейство черепах</h1>
-      <button type="button" class="btn btn-primary js-form" data-url="{{ route('turtles.create') }}">
-        <i class="fa-solid fa-plus"></i> Добавить
-      </button>
-    </div>
+    <h1 id="title">Семейство черепах</h1>
 
     @if (session('success'))
       <div class="alert alert-success">{{ session('success') }}</div>
@@ -24,10 +19,10 @@
               <p class="content-description">{{ $turtle->description }}</p>
               <div class="d-flex gap-2">
                 <button type="button" class="btn btn-primary js-show"
-                  data-url="{{ route('turtles.show', $turtle) }}">Подробнее</button>
-                <button type="button" class="btn btn-primary js-form ms-auto" data-url="{{ route('turtles.edit', $turtle) }}"
+                  data-url="{{ route('turtles.show', $turtle, false) }}">Подробнее</button>
+                <button type="button" class="btn btn-primary js-form ms-auto" data-url="{{ route('turtles.edit', $turtle, false) }}"
                   aria-label="Изменить"><i class="fa-solid fa-pen"></i></button>
-                <form method="POST" action="{{ route('turtles.destroy', $turtle) }}"
+                <form method="POST" action="{{ route('turtles.destroy', $turtle, false) }}"
                   onsubmit="return confirm('Удалить черепаху?')">
                   @csrf
                   @method('DELETE')
@@ -39,7 +34,7 @@
           </div>
         </div>
       @empty
-        <p>Черепах пока нет. Нажмите «Добавить».</p>
+        <p>Черепах пока нет. Нажмите «Загрузить» в шапке.</p>
       @endforelse
     </div>
   </div>

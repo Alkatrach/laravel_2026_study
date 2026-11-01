@@ -1,6 +1,6 @@
 @php($isEdit = $turtle->exists)
 
-<form method="POST" action="{{ $isEdit ? route('turtles.update', $turtle) : route('turtles.store') }}"
+<form method="POST" action="{{ $isEdit ? route('turtles.update', $turtle, false) : route('turtles.store', [], false) }}"
   enctype="multipart/form-data" class="js-turtle-form" novalidate>
   @csrf
   @if ($isEdit)
@@ -36,7 +36,7 @@
     <div class="mb-3">
       <label for="f-details" class="form-label">Подробности для окна</label>
       <textarea id="f-details" name="details" class="form-control" rows="4">{{ $turtle->details }}</textarea>
-      <div class="form-text">Каждый абзац с новой строки. Подсказка при наведении: {{ '{{слово|пояснение}}' }}</div>
+      <div class="form-text">Каждый абзац с новой строки. Подсказка при наведении: @{{слово|пояснение}}</div>
       <div class="invalid-feedback"></div>
     </div>
 

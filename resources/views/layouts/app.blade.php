@@ -12,7 +12,7 @@
   <nav id="header" class="navbar navbar-expand-lg">
     <div class="container-fluid">
       <div id="header-logo-container">
-        <a class="nav-link d-inline-flex align-turtles-center" aria-current="page" href="{{ route('turtles.index') }}">
+        <a class="nav-link d-inline-flex align-items-center" aria-current="page" href="{{ route('turtles.index') }}">
           <span id="header-logo">🐢</span>
           <span id="header-title" class="navbar-brand ms-1">Сайт про черепах</span>
         </a>
@@ -24,7 +24,8 @@
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav w-100">
           <a class="nav-link active" aria-current="page" href="{{ route('turtles.index') }}">Главная страница</a>
-          <button class="ms-lg-auto btn btn-primary" id="liveToastBtn">Загрузить</button>
+          <button type="button" class="ms-lg-auto btn btn-primary js-form"
+            data-url="{{ route('turtles.create', [], false) }}">Загрузить</button>
         </div>
       </div>
     </div>
@@ -43,20 +44,6 @@
       </div>
     </div>
   </nav>
-
-  <div class="toast-container position-fixed bottom-0 end-0 p-3">
-    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="toast-header">
-        <i class="fa-solid fa-spinner fa-spin"></i>
-        <strong class="me-auto">Ой!</strong>
-        <small>Черепаший Иисус покинул нас.</small>
-        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-      <div class="toast-body">
-        На текущий момент этот функционал недоступен.
-      </div>
-    </div>
-  </div>
 </body>
 
 </html>
