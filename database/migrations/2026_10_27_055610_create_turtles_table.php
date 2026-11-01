@@ -7,17 +7,19 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     public function up(): void
-    {
-        Schema::create('turtles', function (Blueprint $table) {
-            $table->id();
-            $table->string('title');
-            $table->text('description');
-            $table->date('publication_date');
-            $table->string('image')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
-        });
-    }
+{
+    Schema::create('turtles', function (Blueprint $table) {
+        $table->id();
+        $table->string('title');
+        $table->string('type');
+        $table->text('description');
+        $table->text('details')->nullable();
+        $table->date('publication_date')->nullable();
+        $table->string('image')->nullable();
+        $table->timestamps();
+        $table->softDeletes();
+    });
+}
 
     /**
      * Reverse the migrations.
