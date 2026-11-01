@@ -21,16 +21,23 @@ class Turtle extends Model
     protected function title(): Attribute
     {
         return Attribute::make(
-            set: fn ($value) => Str::ucfirst(trim($value)),
+            set: fn (string $value) => Str::ucfirst(trim($value)), //самый типичный пример мутатора. делает первую букву заглавной
         );
     }
 
-    protected function publicationDate(): Attribute
+    //protected function publicationDate(): Attribute
+    //{
+    //    return Attribute::make(
+    //        get: fn ($value) => $value ? Carbon::parse($value) : null,
+    //        set: fn ($value) => $value ? Carbon::parse($value)->format('Y-m-d') : null,
+    //    );
+    //}
+
+    protected function casts(): array //так в вики 13 ларавела
     {
-        return Attribute::make(
-            get: fn ($value) => $value ? Carbon::parse($value) : null,
-            set: fn ($value) => $value ? Carbon::parse($value)->format('Y-m-d') : null,
-        );
+        return [
+            'publication_date' => 'date:Y-m-d',
+        ];
     }
 
     protected function imageUrl(): Attribute
