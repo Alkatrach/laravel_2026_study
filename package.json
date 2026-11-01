@@ -15,8 +15,15 @@
         "@laravel/multiplex": "^0.4.1"
     },
     "dependencies": {
+<<<<<<< HEAD
         "@popperjs/core": "^2.11.8",
         "bootstrap": "^5.3.8",
+=======
+        "@fortawesome/fontawesome-free": "^7.3.1",
+        "@popperjs/core": "^2.11.8",
+        "bootstrap": "^5.3.8",
+        "fontawesome": "^5.6.3",
+>>>>>>> 9ebdf3c85f778c0ca95bb933042340d38baa3394
         "jquery": "^4.0.0",
         "sass": "^1.106.1"
     }
