@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Turtle;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\Drivers\Gd\Driver;
@@ -14,7 +16,7 @@ class TurtleController extends Controller
 {
     public function index()
     {
-        return view('turtles.index', ['turtles' => Turtle::orderBy('id')->get()]);
+        return redirect()->route('users.show', Auth::user());
     }
 
     public function create(Request $request)
@@ -30,23 +32,35 @@ class TurtleController extends Controller
             $data['image'] = $this->saveImage($request->file('image'));
         }
 
-        Turtle::create($data);
+        $request->user()->turtles()->create($data);
 
         return $this->done($request, 'Черепаха добавлена');
     }
 
     public function show(Request $request, Turtle $turtle)
     {
-        return $this->modal($request, 'turtles.show', compact('turtle'));
+        if ($turtle->trashed()) {
+            Gate::authorize('is-admin');
+        }
+
+        return $this->modal($request, 'turtles.show', [
+            'turtle' => $turtle,
+            'comments' => $turtle->comments()->with('user')->get(),
+            'friendIds' => $request->user()->friends()->pluck('users.id'),
+        ]);
     }
 
     public function edit(Request $request, Turtle $turtle)
     {
+        Gate::authorize('update-turtle', $turtle);
+
         return $this->modal($request, 'turtles.form', compact('turtle'));
     }
 
     public function update(Request $request, Turtle $turtle)
     {
+        Gate::authorize('update-turtle', $turtle);
+
         $data = $this->validated($request);
 
         if ($request->hasFile('image')) {
@@ -63,9 +77,35 @@ class TurtleController extends Controller
 
     public function destroy(Request $request, Turtle $turtle)
     {
+        Gate::authorize('delete-turtle', $turtle);
+
         $turtle->delete();
 
         return $this->done($request, 'Черепаха удалена');
+    }
+
+    public function restore(Request $request, int $id)
+    {
+        Gate::authorize('is-admin');
+
+        Turtle::onlyTrashed()->findOrFail($id)->restore();
+
+        return $this->done($request, 'Черепаха восстановлена');
+    }
+
+    public function forceDelete(Request $request, int $id)
+    {
+        Gate::authorize('is-admin');
+
+        $turtle = Turtle::onlyTrashed()->findOrFail($id);
+
+        if ($turtle->image) {
+            Storage::disk('public')->delete($turtle->image);
+        }
+
+        $turtle->forceDelete();
+
+        return $this->done($request, 'Черепаха удалена навсегда');
     }
 
     private function modal(Request $request, string $view, array $data)
@@ -77,9 +117,7 @@ class TurtleController extends Controller
     {
         session()->flash('success', $message);
 
-        return $request->expectsJson()
-            ? response()->json(['ok' => true])
-            : redirect()->route('turtles.index');
+        return $request->expectsJson() ? response()->json(['ok' => true]) : back();
     }
 
     private function validated(Request $request): array

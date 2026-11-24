@@ -51,7 +51,8 @@ document.addEventListener('click', (e) => {
 })
 
 document.addEventListener('keydown', (e) => {
-  if (!detailsModal.classList.contains('show') || !['ArrowLeft', 'ArrowRight'].includes(e.key)) return
+  if (e.target.closest('input, textarea')) return
+  if (!detailsModal?.classList.contains('show') || !['ArrowLeft', 'ArrowRight'].includes(e.key)) return
 
   const list = showButtons()
   const step = e.key === 'ArrowRight' ? 1 : -1
@@ -88,6 +89,33 @@ document.addEventListener('submit', async (e) => {
       input.classList.add('is-invalid')
       input.parentElement.querySelector('.invalid-feedback').textContent = messages[0]
     })
+    return
+  }
+
+  alert(`Сервер ответил ошибкой ${res.status}`)
+})
+
+document.addEventListener('submit', async (e) => {
+  const form = e.target.closest('.js-comment-form')
+  if (!form) return
+
+  e.preventDefault()
+
+  const res = await fetch(form.action, {
+    method: 'POST',
+    body: new FormData(form),
+    headers: { ...ajaxHeaders, Accept: 'application/json' },
+  })
+
+  if (res.ok) {
+    load(form.dataset.reload, detailsModal)
+    return
+  }
+
+  if (res.status === 422) {
+    const { errors } = await res.json()
+    form.elements.body.classList.add('is-invalid')
+    form.querySelector('.invalid-feedback').textContent = errors.body[0]
     return
   }
 

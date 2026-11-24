@@ -4,40 +4,68 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
 class Turtle extends Model
 {
-    //Астрологи объявили неделю стрелочных функций!
-    //Количество function, return и фигурных скобок в коде снижено на 50%. Прирост лаконичности во всех репозиториях увеличился вдвое! 
-    //До этого здесь была грязь.
-
     use SoftDeletes;
 
     protected $fillable = ['title', 'type', 'description', 'details', 'publication_date', 'image'];
 
-    protected function title(): Attribute
+    protected static function booted(): void
     {
-        return Attribute::make(
-            set: fn (string $value) => Str::ucfirst(trim($value)), //самый типичный пример мутатора. делает первую букву заглавной
-        );
+        static::updating(function (Turtle $turtle) {
+            if (Auth::check()) {
+                Gate::authorize('update-turtle', $turtle);
+            }
+        });
+
+        static::deleting(function (Turtle $turtle) {
+            if (! Auth::check()) {
+                return;
+            }
+
+            if ($turtle->isForceDeleting()) {
+                Gate::authorize('is-admin');
+            } else {
+                Gate::authorize('delete-turtle', $turtle);
+            }
+        });
+
+        static::restoring(function (Turtle $turtle) {
+            if (Auth::check()) {
+                Gate::authorize('is-admin');
+            }
+        });
     }
 
-    //protected function publicationDate(): Attribute
-    //{
-    //    return Attribute::make(
-    //        get: fn ($value) => $value ? Carbon::parse($value) : null,
-    //        set: fn ($value) => $value ? Carbon::parse($value)->format('Y-m-d') : null,
-    //    );
-    //}
-
-    protected function casts(): array //так в вики 13 ларавела
+    protected function casts(): array
     {
         return [
             'publication_date' => 'date:Y-m-d',
         ];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class)->oldest();
+    }
+
+    protected function title(): Attribute
+    {
+        return Attribute::make(
+            set: fn (string $value) => Str::ucfirst(trim($value)),
+        );
     }
 
     protected function imageUrl(): Attribute
@@ -53,11 +81,11 @@ class Turtle extends Model
     {
         return Attribute::make(
             get: function () {
-                $paragraphs = preg_split('/\R+/u', trim((string) $this->details));//абзацы по переносам строк
-                //убираю пустые абзацы, парсю html заранее
+                $paragraphs = preg_split('/\R+/u', trim((string) $this->details));
+
                 return collect($paragraphs)->filter()->map(function ($paragraph) {
                     $paragraph = preg_replace_callback(
-                        '/\{\{(.+?)\|(.+?)\}\}/u',//регулярка для разбития
+                        '/\{\{(.+?)\|(.+?)\}\}/u',
                         fn ($m) => '<span class="popover-term" tabindex="0" data-bs-toggle="popover" data-bs-title="'
                             . Str::ucfirst($m[1]) . '" data-bs-content="' . $m[2] . '">' . $m[1] . '</span>',
                         e($paragraph)

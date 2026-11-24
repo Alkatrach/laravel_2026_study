@@ -49,6 +49,9 @@ $button-color: #265c00;
 
 body {
     background-color: $base-color;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .popover-term {
@@ -103,6 +106,7 @@ body {
             border-radius: 2px;
             font-size: 1rem;
         }
+        margin-bottom: 1vh;
     }
 
     @for $i from 1 through 5 {
@@ -116,7 +120,7 @@ body {
 
 #footer {
     background-color: $header-footer-color;
-    margin-top: 1vh;
+    margin-top: auto;
 
     #footer-social {
         img {
